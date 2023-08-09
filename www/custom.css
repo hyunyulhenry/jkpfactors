@@ -1,0 +1,4 @@
+/* 서브메뉴를 항상 펼쳐진 상태로 보여줌 */
+.sidebar-menu .treeview-menu {
+    display: block !important;
+}
