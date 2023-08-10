@@ -87,7 +87,8 @@ ui <- dashboardPage(
       tabItem("overview",
               fluidRow(
                 column(3, uiOutput('location')),
-                column(3, uiOutput('select_factor'))
+                column(3, uiOutput('select_factor')),
+                column(3, uiOutput('date')),
               ),
               tabsetPanel(
                 tabPanel("Graph",
@@ -161,6 +162,7 @@ server <- function(input, output, session) {
     down_tbl() %>%
       filter(Location %in% input$location) %>%
       filter(Factor %in% input$select_factor) %>%
+      filter(Date >= input$date[[1]], Date <= input$date[[2]]) %>%
       group_by(Location, Factor) %>%
       summarise(
         data_count = n(),
@@ -241,7 +243,17 @@ server <- function(input, output, session) {
     )
   })
   
-  output$downloadData = downloadHandler(
+  output$date <- renderUI({
+    dateRangeInput('date', 'Date Range',
+                   start = min(down_tbl()$Date),
+                   end = max(down_tbl()$Date),
+                   min = min(down_tbl()$Date),
+                   max = max(down_tbl()$Date),
+                   format = "yyyy-mm-dd",
+                   separator = " - ")
+  })
+  
+  output$downloadData <- downloadHandler(
     
     filename = function() {
       paste("factor_data", ".csv", sep="")
@@ -285,6 +297,7 @@ server <- function(input, output, session) {
     tbl = down_tbl() %>%
       filter(Location %in% input$location) %>%
       filter(Factor %in% input$select_factor) %>%
+      filter(Date >= input$date[[1]], Date <= input$date[[2]]) %>%
       mutate(Return = log(1 + Return)) %>%
       group_by(Factor, Location) %>%
       arrange(Date) %>%
