@@ -22,14 +22,14 @@ ui <- dashboardPage(
       menuItem("Dashboard", icon = icon("dashboard"),
                menuSubItem("Overview", tabName = "overview"),
                menuSubItem("Raw Data", tabName = "raw_return")
-               ),
+      ),
       br(),
       pickerInput(
         inputId = "region",
         label = "Region/Country", 
         choices = c('All Regions', 'All Countries'),
         selected = 'All Regions',
-        ),
+      ),
       
       pickerInput(
         inputId = "factor",
@@ -95,20 +95,20 @@ ui <- dashboardPage(
                          br(),
                          uiOutput('welcome'),
                          plotOutput('graph', height = "600px") %>% withSpinner()
-                         ),
+                ),
                 tabPanel("Summary",
                          br(),
                          dataTableOutput('stat_table_dt') %>% withSpinner()
-                         ),
+                ),
               )
-              ),
+      ),
       tabItem("raw_return",
               uiOutput("dynamic") %>% withSpinner()
       ),
       tabItem("source",
               includeMarkdown('source.Rmd')
-              )
       )
+    )
     
   )
 )
@@ -116,7 +116,7 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   
   down_tbl <- eventReactive(input$action, {
-
+    
     q_region <- data[[1]] %>% filter(region == input$region) %>% select(query) %>% pull()
     q_factor <- data[[2]] %>% filter(factor == input$factor) %>% select(query) %>% pull()
     q_freq <- data[[3]] %>% filter(frequency == input$freq) %>% select(query) %>% pull()
@@ -203,7 +203,7 @@ server <- function(input, output, session) {
                 });"
                     )
       ) 
-      # formatStyle(columns = names(stat_table()), fontSize = '15px')
+    # formatStyle(columns = names(stat_table()), fontSize = '15px')
     
   }, server = TRUE)
   
@@ -219,7 +219,7 @@ server <- function(input, output, session) {
         c('United States', 'Japan', 'Korea', 'China')
       } else {
         unique(down_tbl()$Location)[1:5]
-        },
+      },
       options = list(`actions-box` = TRUE, `live-search` = TRUE), 
       multiple = TRUE
     )
@@ -266,8 +266,8 @@ server <- function(input, output, session) {
   output$welcome <- renderUI({
     
     if (input$action == 0) {
-     HTML(
-       '
+      HTML(
+        '
        <br>
        <p style="font-size: 30px; padding-left: 30px;">
 1. Select the desired item from the left menu.<br>
@@ -275,7 +275,7 @@ server <- function(input, output, session) {
 3. Selected data appears in the dashboard.       
 </p>
        '
-     )
+      )
     }
   })
   
@@ -309,17 +309,18 @@ server <- function(input, output, session) {
       xlab('') + ylab('Log Cumulative Return') +
       theme_bw() +
       labs(color = NULL) +
-      theme(text = element_text(size = 20))
+      theme(text = element_text(size = 20)) +
+      guides(color = guide_legend(override.aes = list(linewidth=5))) 
     
     if(length(unique(tbl$Location)) > 1) {
       p <- p + facet_wrap(~ Location, scales = 'free')
     } 
     
     return(p)
-      
+    
   })
   
-  }
+}
 
 shinyApp(ui, server)
 
